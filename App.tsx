@@ -89,8 +89,6 @@ const App: React.FC = () => {
             <ResultsDisplay
               loadingMessage={loadingMessage}
               error={error}
-              frontImage={frontImage?.base64 || null}
-              backImage={backImage?.base64 || null}
               cardInfo={identifiedCardInfo}
               pricingData={pricingData}
             />

@@ -1,5 +1,7 @@
 {
   "name": "Pocket Appraisal",
   "description": "An application to identify and price sports cards using manual input or photo uploads. It leverages AI to find card details, parallels, and recent market prices for raw and graded cards.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

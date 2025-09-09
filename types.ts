@@ -7,6 +7,8 @@ export interface ManualCardInput {
 
 export interface IdentifiedCardInfo extends ManualCardInput {
   parallelDescription: string | null;
+  suggestedGrade?: number | null;
+  conditionNotes?: string[];
 }
 
 export interface PriceSource {
@@ -24,7 +26,6 @@ export interface PriceInfo {
 }
 
 export interface PricingData {
-  cardImageUrl: string | null;
   baseCard: PriceInfo;
   parallels: PriceInfo[];
 }

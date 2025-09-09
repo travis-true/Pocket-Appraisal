@@ -22,9 +22,13 @@ export const identifyCardFromImages = async (
 ): Promise<IdentifiedCardInfo> => {
   const model = "gemini-2.5-flash";
 
-  const prompt = `You are a sports card identification expert. Based on the provided front and back images of this sports card, identify the following details: Year, Manufacturer/Set, Player Name, and Card Number. Also, identify if this is a specific parallel or variation. If it is a parallel, describe it (e.g., 'Refractor', 'Prizm Silver', 'Gold /10').
+  const prompt = `You are a sports card expert, specializing in both identification and professional grading. Based on the provided front and back images of this sports card, perform two tasks:
 
-Respond with ONLY a JSON object with the keys: "year", "set", "player", "cardNumber", and "parallelDescription". If a field cannot be identified, return null for its value.`;
+1.  **Identification**: Identify the Year, Manufacturer/Set, Player Name, and Card Number. Also, identify if this is a specific parallel or variation. If it is a parallel, describe it (e.g., 'Refractor', 'Prizm Silver', 'Gold /10').
+
+2.  **Condition Assessment**: Analyze the card's condition based on centering, corners, edges, and surface. Provide a suggested raw grade on a scale of 1 to 10 (e.g., 8.5, 9, 10). Also, provide a list of specific observations about the card's condition.
+
+Respond with ONLY a JSON object with the keys: "year", "set", "player", "cardNumber", "parallelDescription", "suggestedGrade" (as a number), and "conditionNotes" (as an array of strings). If a field cannot be identified, return null for its value. The grade and notes should be based on a critical assessment of the images.`;
 
   const frontImagePart = fileToGenerativePart(frontImage.base64, frontImage.mimeType);
   const backImagePart = fileToGenerativePart(backImage.base64, backImage.mimeType);
@@ -48,7 +52,7 @@ Respond with ONLY a JSON object with the keys: "year", "set", "player", "cardNum
 
 export const getPricingAndParallels = async (cardInfo: ManualCardInput): Promise<PricingData> => {
   const model = "gemini-2.5-flash";
-  const prompt = `You are a sports card pricing expert. For the card: ${cardInfo.year} ${cardInfo.set} ${cardInfo.player} #${cardInfo.cardNumber}, provide a list of its common parallels and recent sales prices. Also provide a URL for a high-quality, representative image of the base card.
+  const prompt = `You are a sports card pricing expert. For the card: ${cardInfo.year} ${cardInfo.set} ${cardInfo.player} #${cardInfo.cardNumber}, provide a list of its common parallels and recent sales prices.
   The prices should reflect the current market for both RAW (ungraded) and top-graded conditions (like PSA 10 or BGS 9.5).
   For each price (raw and graded), provide the source of the data (e.g., eBay, 130point.com) including its name and a direct URL to the sales data if available. Provide separate sources for raw and graded prices. Also include the date range for the sales (e.g., 'Last 30 days').`;
 
@@ -78,14 +82,13 @@ export const getPricingAndParallels = async (cardInfo: ManualCardInput): Promise
   const pricingSchema = {
     type: Type.OBJECT,
     properties: {
-      cardImageUrl: { type: Type.STRING, description: "URL for a representative image of the base card." },
       baseCard: priceInfoSchema,
       parallels: {
         type: Type.ARRAY,
         items: priceInfoSchema,
       },
     },
-    required: ["cardImageUrl", "baseCard", "parallels"],
+    required: ["baseCard", "parallels"],
   };
   
   const response = await ai.models.generateContent({

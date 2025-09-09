@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { IdentifiedCardInfo, PricingData } from '../types';
 import Spinner from './Spinner';
@@ -7,13 +6,12 @@ import PricingTable from './PricingTable';
 interface ResultsDisplayProps {
   loadingMessage: string | null;
   error: string | null;
-  frontImage: string | null;
-  backImage: string | null;
   cardInfo: IdentifiedCardInfo | null;
   pricingData: PricingData | null;
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ loadingMessage, error, frontImage, backImage, cardInfo, pricingData }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ loadingMessage, error, cardInfo, pricingData }) => {
+
   const renderContent = () => {
     if (loadingMessage) {
       return (
@@ -52,29 +50,47 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ loadingMessage, error, 
     }
     
     const allPriceInfo = [pricingData.baseCard, ...pricingData.parallels];
-    const displayImage = pricingData.cardImageUrl || frontImage;
 
     return (
-      <div className="p-6 md:p-8 h-full overflow-y-auto">
-        <div className="flex flex-col md:flex-row gap-6 mb-6">
-          {displayImage && (
-             <div className="flex justify-center md:justify-start flex-shrink-0">
-                <img src={displayImage} alt={`${cardInfo.year} ${cardInfo.set} ${cardInfo.player}`} className="max-h-64 object-contain rounded-lg shadow-lg bg-gray-900/50" />
-            </div>
-          )}
-          <div className="flex-grow">
-            <h2 className="text-2xl font-bold text-white">{cardInfo.player}</h2>
-            <p className="text-lg text-indigo-400">{`${cardInfo.year} ${cardInfo.set}`}</p>
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
-                {cardInfo.cardNumber && <span>Card #{cardInfo.cardNumber}</span>}
-                {cardInfo.parallelDescription && cardInfo.parallelDescription !== "Base Card" && (
-                    <span className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">{cardInfo.parallelDescription}</span>
-                )}
-            </div>
+      <div className="p-4 sm:p-6 md:p-8 h-full overflow-y-auto custom-scrollbar">
+        {/* Card Info Header */}
+        <div className="mb-6 bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+          <h2 className="text-2xl font-bold text-white leading-tight truncate">{cardInfo.player}</h2>
+          <p className="text-base text-indigo-300 font-semibold">{`${cardInfo.year} ${cardInfo.set}`}</p>
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mt-2 text-sm text-gray-200">
+            {cardInfo.cardNumber && <span>Card #{cardInfo.cardNumber}</span>}
+            {cardInfo.parallelDescription && cardInfo.parallelDescription !== "Base Card" && (
+              <span className="bg-purple-500/30 text-purple-200 px-2.5 py-1 rounded-full text-xs font-semibold border border-purple-400/50">{cardInfo.parallelDescription}</span>
+            )}
           </div>
         </div>
-        <h3 className="text-xl font-semibold mb-4 text-gray-200 border-b border-gray-700 pb-2">Price Guide & Parallels</h3>
-        <PricingTable data={allPriceInfo} />
+        
+        {/* AI Condition Report */}
+        {typeof cardInfo.suggestedGrade === 'number' && cardInfo.conditionNotes && cardInfo.conditionNotes.length > 0 && (
+            <div className="mb-6 bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-200 mb-3">AI Condition Report</h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+                <div className="flex-shrink-0 text-center bg-gray-800/50 p-3 rounded-lg">
+                    <div className="text-4xl font-bold text-indigo-400 leading-none">{cardInfo.suggestedGrade}</div>
+                    <div className="text-xs text-gray-500 font-medium tracking-wider">GRADE</div>
+                </div>
+                <div className="sm:border-l-2 sm:border-gray-700 sm:pl-4">
+                    <p className="text-sm text-gray-400">This is an AI-generated estimate of the card's raw condition based on the provided images. It is not a guarantee of a professional grade.</p>
+                </div>
+              </div>
+              <h4 className="text-sm font-semibold text-gray-300 mb-2">Observations:</h4>
+              <ul className="space-y-1.5 list-disc list-inside text-gray-300 text-sm marker:text-indigo-400">
+                {cardInfo.conditionNotes.map((note, index) => (
+                  <li key={index}>{note}</li>
+                ))}
+              </ul>
+            </div>
+        )}
+
+        <div>
+          <h3 className="text-xl font-semibold mb-4 text-gray-200 border-b border-gray-700 pb-2">Price Guide & Parallels</h3>
+          <PricingTable data={allPriceInfo} />
+        </div>
       </div>
     );
   };
